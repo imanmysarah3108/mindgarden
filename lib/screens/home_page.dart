@@ -240,7 +240,7 @@ class EntriesListScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 20), // Space after "How are you feeling today?"
+        const SizedBox(height: 16), // Space after "How are you feeling today?"
         SizedBox(
           height: 80, // Adjust height as needed
           child: ListView.builder(
@@ -342,7 +342,7 @@ class EntriesListScreen extends StatelessWidget {
         ),
         // Insert the new mood picker here
         _buildMoodPicker(context, homePageInherited.refreshEntries),
-        const SizedBox(height:40), // Space before "Past Entries"
+        const SizedBox(height: 30), // Space between mood picker and "Past Entries"
         Padding( // New Padding for "Past Entries" to control its alignment
           padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
           child: Align(
@@ -378,55 +378,60 @@ class EntriesListScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final entry = entries[index];
                       return Card(
-                        color: entry.displayColor ?? Theme.of(context).cardColor,
                         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         elevation: 2.0,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16.0),
-                          // Display mood emoji on the left
-                          leading: Text(
-                            _getMoodEmoji(entry.mood),
-                            style: const TextStyle(fontSize: 30), // Adjust size as needed
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: entry.displayColor != null
+                              ? BorderSide(color: entry.displayColor!, width: 2) // Use color as outline
+                              : BorderSide.none, // No border if no color
+                        ),
+                        child: Container( // Wrap ListTile in Container to set background color
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor, // Default card background
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          title: Text(
-                            entry.title,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: (entry.displayColor != null &&
-                                          entry.displayColor!.computeLuminance() < 0.5)
-                                      ? Colors.white
-                                      : Colors.black,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16.0),
+                            // Display mood emoji on the left
+                            leading: Text(
+                              _getMoodEmoji(entry.mood),
+                              style: const TextStyle(fontSize: 30), // Adjust size as needed
+                            ),
+                            title: Text(
+                              entry.title,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface, // Text color based on theme
+                                  ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Only display the date, remove content
+                                const SizedBox(height: 4.0),
+                                Text(
+                                  DateFormat('yyyy-MM-dd').format(entry.entryDate),
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant, // Text color based on theme
+                                      ),
                                 ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Only display the date, remove content
-                              const SizedBox(height: 4.0),
-                              Text(
-                                DateFormat('yyyy-MM-dd').format(entry.entryDate),
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      color: (entry.displayColor != null &&
-                                              entry.displayColor!.computeLuminance() < 0.5)
-                                          ? Colors.white70
-                                          : Colors.black54,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EntryEditorPage(entry: entry),
-                              ),
-                            );
-                            if (result == true) {
-                              homePageInherited.refreshEntries();
-                            }
-                          },
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.redAccent),
-                            onPressed: () => homePageInherited.deleteEntry(entry.id),
+                              ],
+                            ),
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EntryEditorPage(entry: entry),
+                                ),
+                              );
+                              if (result == true) {
+                                homePageInherited.refreshEntries();
+                              }
+                            },
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              onPressed: () => homePageInherited.deleteEntry(entry.id),
+                            ),
                           ),
                         ),
                       );

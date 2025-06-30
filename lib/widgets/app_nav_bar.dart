@@ -19,11 +19,11 @@ class AppNavBar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Entries',
+          //label: 'Entries',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.bar_chart),
-          label: 'Stats',
+          //label: 'Stats',
         ),
       ],
     );

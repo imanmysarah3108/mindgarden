@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           onErrorContainer: const Color(0xFFB71C1C),
 
           // Background/Surface - Adjusted for better differentiation
-          background: const Color(0xFFF5F5F5),               // Slightly off-white background
+          background: const Color.fromARGB(255, 255, 231, 231),               // Slightly off-white background
           onBackground: const Color(0xFF333333), // Dark Gray text
           surface: const Color(0xFFFFFFFF), // Pure white for cards/surfaces to stand out
           onSurface: const Color(0xFF333333),
