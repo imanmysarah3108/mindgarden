@@ -25,6 +25,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
   List<String> _tags = [];
   final _tagController = TextEditingController();
   String? _selectedColorHex;
+  String? _selectedMood; // New state variable for selected mood
 
   final List<Color> _availableColors = [
     const Color(0xFFFADADD), // Light Pink
@@ -32,6 +33,18 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     const Color(0xFFD4F4D4), // Light Green
     const Color(0xFFFFFACD), // Lemon Chiffon
     const Color(0xFFE6E6FA), // Lavender
+  ];
+
+  // Define a list of moods with emojis
+  final List<Map<String, String>> _availableMoods = [
+    {'name': 'Happy', 'emoji': '😊'},
+    {'name': 'Calm', 'emoji': '😌'},
+    {'name': 'Neutral', 'emoji': '😐'},
+    {'name': 'Sad', 'emoji': '😢'},
+    {'name': 'Anxious', 'emoji': '😟'},
+    {'name': 'Angry', 'emoji': '😠'},
+    {'name': 'Excited', 'emoji': '🤩'},
+    {'name': 'Tired', 'emoji': '😴'},
   ];
 
   @override
@@ -44,6 +57,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       _currentImageUrl = widget.entry!.imageUrl;
       _tags = widget.entry!.tags ?? [];
       _selectedColorHex = widget.entry!.color;
+      _selectedMood = widget.entry!.mood; // Load existing mood
     }
   }
 
@@ -145,6 +159,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       'image_url': finalImageUrl,
       'tags': _tags,
       'color': _selectedColorHex,
+      'mood': _selectedMood, // Save the selected mood
     };
 
     try {
@@ -180,6 +195,8 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildMoodChooser(), // Add mood chooser here
+            const SizedBox(height: 16),
             TextFormField(
               controller: _titleController,
               decoration: const InputDecoration(labelText: 'Title'),
@@ -317,6 +334,64 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
               onPressed: _addTag,
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoodChooser() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Mood', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 80, // Adjust height as needed
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _availableMoods.length,
+            itemBuilder: (context, index) {
+              final mood = _availableMoods[index];
+              final isSelected = _selectedMood == mood['name'];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedMood = mood['name'];
+                  });
+                },
+                child: Container(
+                  width: 70, // Adjust width for each mood item
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        mood['emoji']!,
+                        style: const TextStyle(fontSize: 30),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        mood['name']!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );

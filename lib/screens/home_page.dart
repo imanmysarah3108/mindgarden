@@ -18,10 +18,14 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   late Future<List<Entry>> _entriesFuture;
 
-  final List<Widget> _screens = [
-    const EntriesListScreen(),
-    const StatsPage(),
-  ];
+  // The screens list will now be built within the _HomePageInherited scope
+  // to ensure they have access to the inherited data.
+  List<Widget> _getScreens() {
+    return [
+      const EntriesListScreen(),
+      const StatsPage(),
+    ];
+  }
 
   @override
   void initState() {
@@ -68,54 +72,59 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mind Garden'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await supabase.auth.signOut();
-              if (mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Entries',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-        ],
-      ),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
+    return _HomePageInherited(
+      entriesFuture: _entriesFuture,
+      refreshEntries: _refreshEntries,
+      deleteEntry: _deleteEntry,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mind Garden'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
               onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EntryEditorPage(),
-                  ),
-                );
-                if (result == true && mounted) {
-                  _refreshEntries();
+                await supabase.auth.signOut();
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  );
                 }
               },
-              child: const Icon(Icons.add),
-            )
-          : null,
+            ),
+          ],
+        ),
+        body: _getScreens()[_currentIndex], // Access screens via _getScreens()
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Entries',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.bar_chart),
+              label: 'Stats',
+            ),
+          ],
+        ),
+        floatingActionButton: _currentIndex == 0
+            ? FloatingActionButton(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EntryEditorPage(),
+                    ),
+                  );
+                  if (result == true && mounted) {
+                    _refreshEntries();
+                  }
+                },
+                child: const Icon(Icons.add),
+              )
+            : null,
+      ),
     );
   }
 }
@@ -125,15 +134,20 @@ class EntriesListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entriesFuture = context
-        .dependOnInheritedWidgetOfExactType<_HomePageInherited>()!
-        .entriesFuture;
+    // Access the inherited widget safely using .of(context)
+    final homePageInherited = _HomePageInherited.of(context);
+
+    // Provide a fallback or handle the null case if homePageInherited could be null
+    // (though with the fix above, it should not be null here)
+    if (homePageInherited == null) {
+      return const Center(child: Text('Error: Home page data not available.'));
+    }
+
+    final entriesFuture = homePageInherited.entriesFuture;
 
     return RefreshIndicator(
       onRefresh: () async {
-        await context
-            .dependOnInheritedWidgetOfExactType<_HomePageInherited>()!
-            .refreshEntries();
+        await homePageInherited.refreshEntries();
       },
       child: FutureBuilder<List<Entry>>(
         future: entriesFuture,
@@ -194,16 +208,12 @@ class EntriesListScreen extends StatelessWidget {
                         ),
                       );
                       if (result == true) {
-                        context
-                            .dependOnInheritedWidgetOfExactType<_HomePageInherited>()!
-                            .refreshEntries();
+                        homePageInherited.refreshEntries();
                       }
                     },
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => context
-                          .dependOnInheritedWidgetOfExactType<_HomePageInherited>()!
-                          .deleteEntry(entry.id),
+                      onPressed: () => homePageInherited.deleteEntry(entry.id),
                     ),
                   ),
                 );

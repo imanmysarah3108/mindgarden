@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Image.asset(
                 'assets/mindgarden_logo.png',
-                height: 100,
+                height: 180,
               ),
               const SizedBox(height: 40),
               TextFormField(

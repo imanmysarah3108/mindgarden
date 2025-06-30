@@ -25,37 +25,48 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme pastelColorScheme = const ColorScheme(
-      brightness: Brightness.light,
-      primary: Color(0xFFADD8E6),
-      onPrimary: Colors.black87,
-      primaryContainer: Color(0xFFC2E3EF),
-      onPrimaryContainer: Colors.black87,
-      secondary: Color(0xFFFFC0CB),
-      onSecondary: Colors.black87,
-      secondaryContainer: Color(0xFFF0D9E0),
-      onSecondaryContainer: Colors.black87,
-      tertiary: Color(0xFFDDA0DD),
-      onTertiary: Colors.black87,
-      tertiaryContainer: Color(0xFFE9C5E9),
-      onTertiaryContainer: Colors.black87,
-      error: Color(0xFFFF7F7F),
-      onError: Colors.white,
-      errorContainer: Color(0xFFFFE0E0),
-      onErrorContainer: Colors.black87,
-      background: Color(0xFFF5F5DC),
-      onBackground: Colors.black87,
-      surface: Color(0xFFFFFFFF),
-      onSurface: Colors.black87,
-      surfaceVariant: Color(0xFFE0E0E0),
-      onSurfaceVariant: Colors.black87,
-      outline: Color(0xFFA0A0A0),
-      shadow: Colors.black12,
-      inverseSurface: Color(0xFF303030),
-      onInverseSurface: Colors.white,
-      inversePrimary: Color(0xFF6B9EA8),
-      surfaceTint: Color(0xFFADD8E6),
-    );
+    final ColorScheme pastelColorScheme = ColorScheme(
+          brightness: Brightness.light,
+          // Primary Greens
+          primary: const Color(0xFF2E7D32),       // Dark Green (Logo)
+          onPrimary: Colors.white,                // White text/icons
+          primaryContainer: const Color(0xFFA5D6A7), // Light Green
+          onPrimaryContainer: const Color(0xFF1B5E20), // Dark Green text
+
+          // Secondary Yellows
+          secondary: const Color(0xFFFFD600),     // Vibrant Yellow (Logo)
+          onSecondary: Colors.black,              // Black text
+          secondaryContainer: const Color(0xFFFFECB3), // Light Yellow
+          onSecondaryContainer: const Color(0xFF795900), // Dark Yellow text
+
+          // Tertiary Greens
+          tertiary: const Color(0xFF66BB6A),      // Mid Green (Logo)
+          onTertiary: Colors.white,
+          tertiaryContainer: const Color(0xFFC8E6C9),
+          onTertiaryContainer: const Color(0xFF2E7D32),
+
+          // Error States
+          error: const Color(0xFFD32F2F),         // Standard Red
+          onError: Colors.white,
+          errorContainer: const Color(0xFFFFCDD2),
+          onErrorContainer: const Color(0xFFB71C1C),
+
+          // Background/Surface
+          background: Colors.white,               // Pure White
+          onBackground: const Color(0xFF333333), // Dark Gray text
+          surface: Colors.white,
+          onSurface: const Color(0xFF333333),
+          surfaceVariant: const Color(0xFFEEEEEE), // Light Gray
+          onSurfaceVariant: const Color(0xFF666666),
+
+          // Other
+          outline: const Color(0xFFCCCCCC),       // Borders
+          shadow: Colors.black12,
+          inverseSurface: const Color(0xFF121212),
+          onInverseSurface: Colors.white,
+          inversePrimary: const Color(0xFFA5D6A7),
+          surfaceTint: const Color(0xFF2E7D32),
+        );
 
     return MaterialApp(
       title: 'Mind Garden',

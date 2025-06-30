@@ -10,6 +10,7 @@ class Entry {
   final String? imageUrl;
   final List<String>? tags;
   final String? color; // Stored as hex string #AARRGGBB
+  final String? mood; // New mood field
 
   Entry({
     required this.id,
@@ -20,6 +21,7 @@ class Entry {
     this.imageUrl,
     this.tags,
     this.color,
+    this.mood, // Include mood in constructor
   });
 
   factory Entry.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Entry {
       imageUrl: json['image_url'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
       color: json['color'] as String?,
+      mood: json['mood'] as String?, // Parse mood from JSON
     );
   }
 
