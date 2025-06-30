@@ -132,6 +132,27 @@ class _HomePageState extends State<HomePage> {
 class EntriesListScreen extends StatelessWidget {
   const EntriesListScreen({super.key});
 
+  // Define a list of moods with emojis, consistent with entry_editor_page and stats_page
+  final List<Map<String, String>> _availableMoods = const [
+    {'name': 'Happy', 'emoji': '😊'},
+    {'name': 'Calm', 'emoji': '😌'},
+    {'name': 'Neutral', 'emoji': '😐'},
+    {'name': 'Sad', 'emoji': '😢'},
+    {'name': 'Anxious', 'emoji': '😟'},
+    {'name': 'Angry', 'emoji': '😠'},
+    {'name': 'Excited', 'emoji': '🤩'},
+    {'name': 'Tired', 'emoji': '😴'},
+  ];
+
+  String _getMoodEmoji(String? moodName) {
+    if (moodName == null) return '';
+    final mood = _availableMoods.firstWhere(
+      (m) => m['name'] == moodName,
+      orElse: () => {'emoji': ''}, // Return empty string if not found
+    );
+    return mood['emoji'] ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     // Access the inherited widget safely using .of(context)
@@ -170,6 +191,11 @@ class EntriesListScreen extends StatelessWidget {
                   elevation: 2.0,
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16.0),
+                    // Display mood emoji on the left
+                    leading: Text(
+                      _getMoodEmoji(entry.mood),
+                      style: const TextStyle(fontSize: 30), // Adjust size as needed
+                    ),
                     title: Text(
                       entry.title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -182,6 +208,7 @@ class EntriesListScreen extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Only display the date, remove content
                         const SizedBox(height: 4.0),
                         Text(
                           DateFormat('yyyy-MM-dd').format(entry.entryDate),
@@ -191,12 +218,6 @@ class EntriesListScreen extends StatelessWidget {
                                     ? Colors.white70
                                     : Colors.black54,
                               ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Text(
-                          entry.content,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

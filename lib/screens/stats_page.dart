@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/entry.dart';
@@ -56,13 +55,16 @@ class _StatsPageState extends State<StatsPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text("Error fetching stats: ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No data available to show stats."));
+            return const Center(child: Text("No data available to show stats. Start writing some entries!"));
           }
 
           final entries = snapshot.data!;
           final totalEntries = entries.length;
           final streak = _calculateStreak(entries);
-          final mostFrequentMood = _getMostFrequentMood(entries);
+          final moodPercentages = _getMoodPercentages(entries); // Get mood percentages
+          final topTags = _getTopTags(entries, count: 3); // Get top 3 tags with counts
+          final averageEntryLength = _getAverageEntryLength(entries);
+          final totalWordsWritten = _getTotalWordsWritten(entries);
 
           // Calculate start and end dates for "this week" (last 7 days from today)
           final DateTime today = DateTime.now();
@@ -70,49 +72,38 @@ class _StatsPageState extends State<StatsPage> {
           final DateTime endDate = DateTime(today.year, today.month, today.day);
           final String weekRange = "${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}";
 
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Wrap stats cards in a Row for better layout on wider screens
-                Row(
-                  children: [
-                    Expanded(child: _buildStatCard("Total Entries", totalEntries.toString())),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildStatCard("Current Streak", "$streak days")),
-                  ],
+                // Total Entries
+                _buildStatCard("Total Entries", value: totalEntries.toString()),
+                const SizedBox(height: 16), // Add space between cards
+
+                // Current Streak
+                _buildStatCard("Current Streak", value: "$streak days"),
+                const SizedBox(height: 16), // Add space between cards
+
+                // Mood Bar
+                _buildMoodBar(moodPercentages, weekRange),
+                const SizedBox(height: 16),
+
+                // Frequently Recorded Tags
+                _buildFrequentTags(topTags),
+                const SizedBox(height: 16),
+
+                // Average Entry Length
+                _buildStatCard(
+                  "Average Entry Length",
+                  value: "${averageEntryLength.round()} words", // Round to nearest whole number
                 ),
                 const SizedBox(height: 16),
-                // Display the most frequent mood with emoji and date range
-                if (mostFrequentMood != null)
-                  _buildStatCard(
-                    "Your Mood This Week ($weekRange)",
-                    "${mostFrequentMood['emoji']} You feel ${mostFrequentMood['name']!.toLowerCase()} this week.",
-                  ),
-                const SizedBox(height: 24),
-                Text(
-                  "Entries Over Time",
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  height: 300,
-                  child: LineChart(_buildChart(chartData)),
+
+                // Total Words Written
+                _buildStatCard(
+                  "Total Words Written",
+                  value: "${totalWordsWritten.round()} words", // Round to nearest whole number
                 ),
               ],
             ),
@@ -122,7 +113,7 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  Widget _buildStatCard(String title, String value) {
+  Widget _buildStatCard(String title, {String? value, Widget? valueWidget}) {
     return Card(
       elevation: 4, // Increased elevation for a more prominent look
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Rounded corners
@@ -138,14 +129,17 @@ class _StatsPageState extends State<StatsPage> {
               textAlign: TextAlign.center, // Center align title
             ),
             const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-              textAlign: TextAlign.center, // Center align value
-            ),
+            if (value != null)
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                textAlign: TextAlign.center, // Center align value
+              ),
+            if (valueWidget != null)
+              valueWidget,
           ],
         ),
       ),
@@ -161,6 +155,7 @@ class _StatsPageState extends State<StatsPage> {
 
     if (recentEntries.isEmpty) return 0;
 
+    // Sort to ensure correct streak calculation
     recentEntries.sort((a, b) => b.entryDate.compareTo(a.entryDate));
 
     int streak = 0;
@@ -190,70 +185,6 @@ class _StatsPageState extends State<StatsPage> {
     return streak;
   }
 
-  Map<DateTime, int> _prepareChartData(List<Entry> entries) {
-    final Map<DateTime, int> data = {};
-    for (var entry in entries) {
-      final date = DateTime(entry.entryDate.year, entry.entryDate.month, entry.entryDate.day);
-      data[date] = (data[date] ?? 0) + 1;
-    }
-    return data;
-  }
-
-  LineChartData _buildChart(Map<DateTime, int> data) {
-    final spots = data.entries.map((e) {
-      return FlSpot(e.key.millisecondsSinceEpoch.toDouble(), e.value.toDouble());
-    }).toList();
-
-    return LineChartData(
-      gridData: FlGridData(show: false),
-      titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 40,
-            getTitlesWidget: (value, meta) {
-              // Ensure Y-axis labels are whole numbers
-              return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10));
-            },
-            interval: 1, // Ensure labels are for each integer value
-          ),
-        ),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 30,
-            interval: 1000 * 60 * 60 * 24 * 5, // Show titles every 5 days
-            getTitlesWidget: (value, meta) {
-              final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-              return SideTitleWidget(
-                axisSide: meta.axisSide,
-                child: Text(DateFormat('MMM d').format(date), style: const TextStyle(fontSize: 10)),
-              );
-            },
-          ),
-        ),
-        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      ),
-      borderData: FlBorderData(show: true, border: Border.all(color: Colors.grey.shade300)),
-      lineBarsData: [
-        LineChartBarData(
-          spots: spots,
-          isCurved: true,
-          color: Theme.of(context).colorScheme.primary,
-          barWidth: 3,
-          isStrokeCapRound: true,
-          dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(
-            show: true,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-          ),
-        ),
-      ],
-      minY: 0, // Ensure Y-axis starts from 0 for better visualization of counts
-    );
-  }
-
   String? _getMoodEmoji(String moodName) {
     final mood = _availableMoods.firstWhere(
       (m) => m['name'] == moodName,
@@ -262,42 +193,268 @@ class _StatsPageState extends State<StatsPage> {
     return mood['emoji'];
   }
 
-  Map<String, String>? _getMostFrequentMood(List<Entry> entries) {
-    if (entries.isEmpty) return null;
-
+  // New method to get mood percentages for the last 7 days
+  Map<String, double> _getMoodPercentages(List<Entry> entries) {
     // Filter entries for the last 7 days
     DateTime sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
     List<Entry> recentEntries = entries.where((entry) =>
         entry.entryDate.isAfter(sevenDaysAgo) && entry.mood != null
     ).toList();
 
-    if (recentEntries.isEmpty) return null;
+    if (recentEntries.isEmpty) return {};
 
     final Map<String, int> moodCounts = {};
     for (var entry in recentEntries) {
-      if (entry.mood != null) {
-        moodCounts[entry.mood!] = (moodCounts[entry.mood!] ?? 0) + 1;
-      }
+      moodCounts[entry.mood!] = (moodCounts[entry.mood!] ?? 0) + 1;
     }
 
-    if (moodCounts.isEmpty) return null;
-
-    // Find the mood with the highest count
-    String? mostFrequentMoodName;
-    int maxCount = 0;
-    moodCounts.forEach((moodName, count) {
-      if (count > maxCount) {
-        maxCount = count;
-        mostFrequentMoodName = moodName;
-      }
+    final int totalRecentEntries = recentEntries.length;
+    final Map<String, double> moodPercentages = {};
+    moodCounts.forEach((mood, count) {
+      moodPercentages[mood] = (count / totalRecentEntries) * 100;
     });
 
-    if (mostFrequentMoodName != null) {
-      return {
-        'name': mostFrequentMoodName!,
-        'emoji': _getMoodEmoji(mostFrequentMoodName!) ?? '',
-      };
+    return moodPercentages;
+  }
+
+
+  // New Widget for the Mood Bar
+  Widget _buildMoodBar(Map<String, double> moodPercentages, String weekRange) {
+    if (moodPercentages.isEmpty) {
+      return _buildStatCard(
+        "Mood Bar",
+        valueWidget: Column(
+          children: [
+            const Text("No moods recorded this week.", textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(weekRange, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          ],
+        ),
+      );
     }
-    return null;
+
+    // Sort moods by their percentage in descending order for the bar segments
+    final sortedMoods = moodPercentages.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Mood Bar",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            // Mood icons and percentages
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: _availableMoods.map((mood) {
+                final percentage = moodPercentages[mood['name']] ?? 0.0;
+                return Column(
+                  children: [
+                    Text(mood['emoji']!, style: const TextStyle(fontSize: 30)),
+                    Text('${percentage.round()}%', style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            // The actual mood bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container( // Replaced LinearProgressIndicator with a Container
+                height: 20, // Fixed height for the bar
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant, // Background color for the bar
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    double currentWidth = 0;
+                    return Stack(
+                      children: sortedMoods.map((e) {
+                        final moodColor = _getMoodColor(e.key); // Get a color for the mood
+                        final segmentWidth = (e.value / 100) * constraints.maxWidth;
+                        final offset = currentWidth;
+                        currentWidth += segmentWidth;
+                        return Positioned(
+                          left: offset,
+                          top: 0,
+                          bottom: 0,
+                          width: segmentWidth,
+                          child: Container(
+                            color: moodColor,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              weekRange,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper to get a consistent color for each mood for the bar
+  Color _getMoodColor(String moodName) {
+    switch (moodName) {
+      case 'Happy': return Colors.yellow.shade300;
+      case 'Calm': return Colors.lightBlue.shade300;
+      case 'Neutral': return Colors.grey.shade300;
+      case 'Sad': return Colors.blueGrey.shade300;
+      case 'Anxious': return Colors.orange.shade300;
+      case 'Angry': return Colors.red.shade300;
+      case 'Excited': return Colors.green.shade300;
+      case 'Tired': return Colors.purple.shade300;
+      default: return Colors.transparent;
+    }
+  }
+
+
+  // Modified method to get top tags with their counts
+  List<Map<String, dynamic>> _getTopTags(List<Entry> entries, {int count = 3}) {
+    if (entries.isEmpty) return [];
+
+    final Map<String, int> tagCounts = {};
+    for (var entry in entries) {
+      if (entry.tags != null) {
+        for (var tag in entry.tags!) {
+          tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+        }
+      }
+    }
+
+    if (tagCounts.isEmpty) return [];
+
+    // Sort tags by count in descending order
+    final sortedTags = tagCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // Return the top 'count' tags with their counts
+    return sortedTags.take(count).map((e) => {'name': e.key, 'count': e.value}).toList();
+  }
+
+  // New Widget for Frequently Recorded Tags
+  Widget _buildFrequentTags(List<Map<String, dynamic>> topTags) {
+    String mostFrequentTagSummary = "No tags recorded yet.";
+    if (topTags.isNotEmpty) {
+      mostFrequentTagSummary = "You recorded ${topTags.first['name']} the most.";
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Frequently Recorded",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            if (topTags.isNotEmpty)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(), // Disable scrolling
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // 3 items per row
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.8, // Adjust aspect ratio for better sizing
+                ),
+                itemCount: topTags.length,
+                itemBuilder: (context, index) {
+                  final tag = topTags[index];
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Removed the number (index + 1)
+                        // Removed the Icon
+                        Text(
+                          tag['name'],
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          "x${tag['count']}",
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              )
+            else
+              const Text(
+                "No frequently recorded tags yet.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              mostFrequentTagSummary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  double _getAverageEntryLength(List<Entry> entries) {
+    if (entries.isEmpty) return 0.0;
+    int totalWords = 0;
+    for (var entry in entries) {
+      totalWords += entry.content.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).length;
+    }
+    return totalWords / entries.length;
+  }
+
+  int _getTotalWordsWritten(List<Entry> entries) {
+    if (entries.isEmpty) return 0;
+    int totalWords = 0;
+    for (var entry in entries) {
+      totalWords += entry.content.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).length;
+    }
+    return totalWords;
   }
 }

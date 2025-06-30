@@ -51,12 +51,12 @@ class MyApp extends StatelessWidget {
           errorContainer: const Color(0xFFFFCDD2),
           onErrorContainer: const Color(0xFFB71C1C),
 
-          // Background/Surface
-          background: Colors.white,               // Pure White
+          // Background/Surface - Adjusted for better differentiation
+          background: const Color(0xFFF5F5F5),               // Slightly off-white background
           onBackground: const Color(0xFF333333), // Dark Gray text
-          surface: Colors.white,
+          surface: const Color(0xFFFFFFFF), // Pure white for cards/surfaces to stand out
           onSurface: const Color(0xFF333333),
-          surfaceVariant: const Color(0xFFEEEEEE), // Light Gray
+          surfaceVariant: const Color(0xFFEEEEEE), // Light Gray for subtle variations
           onSurfaceVariant: const Color(0xFF666666),
 
           // Other
@@ -98,6 +98,8 @@ class MyApp extends StatelessWidget {
             borderSide: BorderSide(color: pastelColorScheme.primary, width: 2),
           ),
         ),
+        // Explicitly set cardColor to ensure it uses the desired surface color
+        cardColor: pastelColorScheme.surface,
       ),
       home: StreamBuilder(
         stream: supabase.auth.onAuthStateChange,
