@@ -122,20 +122,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: _getScreens()[_currentIndex], // Access screens via _getScreens()
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Entries',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart),
-              label: 'Stats',
-            ),
-          ],
-        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Docked to the center of the bottom app bar
         floatingActionButton: _currentIndex == 0
             ? FloatingActionButton(
                 onPressed: () async {
@@ -149,9 +136,76 @@ class _HomePageState extends State<HomePage> {
                     _refreshEntries();
                   }
                 },
-                child: const Icon(Icons.add),
+                shape: const CircleBorder(), // Ensure it's a perfect circle
+                backgroundColor: Theme.of(context).colorScheme.errorContainer, // Set background color to pinkish
+                child: const Icon(Icons.local_florist), // Flower icon
               )
             : null,
+        bottomNavigationBar: BottomAppBar(
+          shape: const CircularNotchedRectangle(), // Creates a notch for the FAB
+          notchMargin: 6.0, // Reduced notch margin for a tighter fit
+          color: Theme.of(context).colorScheme.primaryContainer, // Match app bar color or theme
+          child: SizedBox( // Added SizedBox to control height
+            height: kBottomNavigationBarHeight - 10.0, // Explicitly set a slightly reduced height
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Expanded(
+                  child: InkWell( // Use InkWell for tap effect
+                    onTap: () => setState(() => _currentIndex = 0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.home,
+                          color: _currentIndex == 0
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                        ),
+                        Text(
+                          'Entries',
+                          style: TextStyle(
+                            color: _currentIndex == 0
+                                ? Theme.of(context).colorScheme.onPrimaryContainer
+                                : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Spacer for the FAB
+                const SizedBox(width: 60), // Adjust width to match FAB size
+                Expanded(
+                  child: InkWell( // Use InkWell for tap effect
+                    onTap: () => setState(() => _currentIndex = 1),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.bar_chart,
+                          color: _currentIndex == 1
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                        ),
+                        Text(
+                          'Stats',
+                          style: TextStyle(
+                            color: _currentIndex == 1
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -186,7 +240,7 @@ class EntriesListScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16), // Space after "How are you feeling today?"
+        const SizedBox(height: 20), // Space after "How are you feeling today?"
         SizedBox(
           height: 80, // Adjust height as needed
           child: ListView.builder(
@@ -288,7 +342,7 @@ class EntriesListScreen extends StatelessWidget {
         ),
         // Insert the new mood picker here
         _buildMoodPicker(context, homePageInherited.refreshEntries),
-        const SizedBox(height: 40),
+        const SizedBox(height:40), // Space before "Past Entries"
         Padding( // New Padding for "Past Entries" to control its alignment
           padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
           child: Align(
