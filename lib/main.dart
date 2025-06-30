@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mindgarden/screens/home_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'screens/home_page.dart';
 import 'screens/login_page.dart';
-import 'screens/main_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +10,10 @@ Future<void> main() async {
   await Supabase.initialize(
     url: 'https://mjldmelaqwluohwgzfbu.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qbGRtZWxhcXdsdW9od2d6ZmJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0Mzc1ODEsImV4cCI6MjA2NjAxMzU4MX0.y1RLbT61jnf9RswXrfD_ebVnVWU3mAFeZ7XSYdsAjw4',
+    authOptions: const FlutterAuthClientOptions(
+  authFlowType: AuthFlowType.pkce,
+  autoRefreshToken: true,
+),
   );
   runApp(const MyApp());
 }
@@ -55,7 +58,7 @@ class MyApp extends StatelessWidget {
     );
 
     return MaterialApp(
-      title: 'Daily Diary',
+      title: 'Mind Garden',
       theme: ThemeData(
         colorScheme: pastelColorScheme,
         fontFamily: GoogleFonts.poppins().fontFamily,
@@ -88,12 +91,13 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder(
         stream: supabase.auth.onAuthStateChange,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return const MainScreen();
+          if (snapshot.hasData && supabase.auth.currentSession != null) {
+            return const HomePage();
           }
           return const LoginPage();
         },
       ),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
