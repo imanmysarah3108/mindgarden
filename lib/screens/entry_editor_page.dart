@@ -9,8 +9,9 @@ import '../utils/constants.dart';
 
 class EntryEditorPage extends StatefulWidget {
   final Entry? entry;
+  final String? initialMood; // New parameter for initial mood
 
-  const EntryEditorPage({super.key, this.entry});
+  const EntryEditorPage({super.key, this.entry, this.initialMood}); // Include initialMood in constructor
 
   @override
   State<EntryEditorPage> createState() => _EntryEditorPageState();
@@ -57,7 +58,9 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       _currentImageUrl = widget.entry!.imageUrl;
       _tags = widget.entry!.tags ?? [];
       _selectedColorHex = widget.entry!.color;
-      _selectedMood = widget.entry!.mood; // Load existing mood
+      _selectedMood = widget.entry!.mood; // Load existing mood from entry
+    } else if (widget.initialMood != null) {
+      _selectedMood = widget.initialMood; // Set initial mood from parameter if creating new entry
     }
   }
 

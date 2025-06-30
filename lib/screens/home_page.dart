@@ -181,6 +181,70 @@ class EntriesListScreen extends StatelessWidget {
     return mood['emoji'] ?? '';
   }
 
+  // New widget for the mood picker on the home page
+  Widget _buildMoodPicker(BuildContext context, Function refreshEntries) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16), // Space after "How are you feeling today?"
+        SizedBox(
+          height: 80, // Adjust height as needed
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _availableMoods.length,
+            itemBuilder: (context, index) {
+              final mood = _availableMoods[index];
+              return GestureDetector(
+                onTap: () async {
+                  // Navigate to EntryEditorPage and pass the selected mood
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EntryEditorPage(initialMood: mood['name']),
+                    ),
+                  );
+                  if (result == true) {
+                    refreshEntries(); // Refresh entries if a new one was added
+                  }
+                },
+                child: Container(
+                  width: 70, // Adjust width for each mood item
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor, // Use card color for mood items
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        mood['emoji']!,
+                        style: const TextStyle(fontSize: 30),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        mood['name']!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Access the inherited widget safely using .of(context)
@@ -202,7 +266,7 @@ class EntriesListScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center, // Keep this for inner centering
             children: [
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               Text(
                 'Welcome, ${nickname ?? 'User'}', // Display nickname, with 'User' as fallback
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -219,10 +283,12 @@ class EntriesListScreen extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center, // Center the text
               ),
-              const SizedBox(height: 30), // Space after "How are you feeling today?"
             ],
           ),
         ),
+        // Insert the new mood picker here
+        _buildMoodPicker(context, homePageInherited.refreshEntries),
+        const SizedBox(height: 40),
         Padding( // New Padding for "Past Entries" to control its alignment
           padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
           child: Align(
