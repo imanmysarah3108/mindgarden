@@ -16,7 +16,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   // Define your onboarding slides content
   final List<Map<String, String>> _onboardingData = [
     {
-      'image': 'assets/onboarding_1.png', // Placeholder, replace with actual asset paths
+      'image': 'assets/mindgarden_logo.png', // Placeholder, replace with actual asset paths
       'title': 'Welcome to Mind Garden',
       'description': 'Your personal space to cultivate thoughts and track your well-being.',
     },
