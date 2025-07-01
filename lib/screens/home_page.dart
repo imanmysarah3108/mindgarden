@@ -162,15 +162,7 @@ class _HomePageState extends State<HomePage> {
                               ? Theme.of(context).colorScheme.onPrimaryContainer
                               : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
                         ),
-                        Text(
-                          'Entries',
-                          style: TextStyle(
-                            color: _currentIndex == 0
-                                ? Theme.of(context).colorScheme.onPrimaryContainer
-                                : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
-                            fontSize: 12,
-                          ),
-                        ),
+                        // Removed Text label
                       ],
                     ),
                   ),
@@ -189,15 +181,7 @@ class _HomePageState extends State<HomePage> {
                               ? Theme.of(context).colorScheme.onPrimaryContainer
                               : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
                         ),
-                        Text(
-                          'Stats',
-                          style: TextStyle(
-                            color: _currentIndex == 1
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                              : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
-                            fontSize: 12,
-                          ),
-                        ),
+                        // Removed Text label
                       ],
                     ),
                   ),
@@ -342,7 +326,7 @@ class EntriesListScreen extends StatelessWidget {
         ),
         // Insert the new mood picker here
         _buildMoodPicker(context, homePageInherited.refreshEntries),
-        const SizedBox(height: 30), // Space between mood picker and "Past Entries"
+        const SizedBox(height: 25), // Space between mood picker and "Past Entries"
         Padding( // New Padding for "Past Entries" to control its alignment
           padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
           child: Align(
@@ -352,6 +336,7 @@ class EntriesListScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 20, // Decreased font size
                   ),
             ),
           ),
@@ -383,7 +368,7 @@ class EntriesListScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: entry.displayColor != null
-                              ? BorderSide(color: entry.displayColor!, width: 2) // Use color as outline
+                              ? BorderSide(color: entry.displayColor!, width: 5) // Use color as outline
                               : BorderSide.none, // No border if no color
                         ),
                         child: Container( // Wrap ListTile in Container to set background color
@@ -400,7 +385,7 @@ class EntriesListScreen extends StatelessWidget {
                             ),
                             title: Text(
                               entry.title,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: Theme.of(context).colorScheme.onSurface, // Text color based on theme
                                   ),
                             ),

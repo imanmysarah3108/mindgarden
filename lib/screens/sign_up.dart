@@ -46,11 +46,11 @@ class _SignUpPageState extends State<SignUpPage> {
     } on AuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign Up Failed: ${e.message}')),
+          SnackBar(content: Text('Sign up Failed: ${e.message}')),
         );
       }
     } finally {
-      if (mounted) setState(() { _isLoading = false; });
+      if(mounted) setState(() { _isLoading = false; });
     }
   }
 
@@ -74,6 +74,15 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text(
+                'Your thoughts deserve a safe place to grow.',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24), // Space after the new text
               TextFormField(
                 controller: _nicknameController,
                 decoration: const InputDecoration(labelText: 'Nickname'),
