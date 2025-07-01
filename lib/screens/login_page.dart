@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'sign_up.dart';
+import 'onboarding_page.dart'; // Import the OnboardingPage
 import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -84,9 +85,10 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
+                  // Navigate to OnboardingPage instead of SignUpPage
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const SignUpPage()),
+                    MaterialPageRoute(builder: (_) => const OnboardingPage()),
                   );
                 },
                 child: const Text("Don't have an account? Sign Up"),

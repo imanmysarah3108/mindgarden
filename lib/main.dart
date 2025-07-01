@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
+import 'package:shared_preferences/shared_preferences.dart'; // Still needed for theme persistence
 import 'screens/home_page.dart';
 import 'screens/login_page.dart';
+// No longer importing onboarding_page directly here, as login_page will handle it.
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _loadThemeMode();
+    // Removed _hasSeenOnboardingFuture as onboarding is now part of sign-up flow
   }
 
   // Load theme mode from SharedPreferences
@@ -58,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     // Light Color Scheme (your existing pastel)
-    final ColorScheme pastelColorScheme = ColorScheme( // Renamed to pastelColorScheme
+    final ColorScheme pastelColorScheme = ColorScheme(
       brightness: Brightness.light,
       primary: const Color(0xFF2E7D32), // Dark Green (Logo)
       onPrimary: Colors.white,
@@ -97,48 +99,48 @@ class _MyAppState extends State<MyApp> {
 
     // Dark Color Scheme
     final ColorScheme darkColorScheme = ColorScheme(
-  brightness: Brightness.dark,
+      brightness: Brightness.dark,
 
-  // Soothing green, matching pastel
-  primary: const Color(0xFFA5D6A7), // Pastel Light Green
-  onPrimary: const Color(0xFF1B5E20), // Deep green for text
-  primaryContainer: const Color(0xFF388E3C),
-  onPrimaryContainer: Colors.white,
+      // Soothing green, matching pastel
+      primary: const Color(0xFFA5D6A7), // Pastel Light Green
+      onPrimary: const Color(0xFF1B5E20), // Deep green for text
+      primaryContainer: const Color(0xFF388E3C),
+      onPrimaryContainer: Colors.white,
 
-  // Muted yellow to avoid eye strain
-  secondary: const Color(0xFFFFF176), // Soft yellow
-  onSecondary: const Color(0xFF3E3E00),
-  secondaryContainer: const Color(0xFFBFAF60),
-  onSecondaryContainer: Colors.black,
+      // Muted yellow to avoid eye strain
+      secondary: const Color(0xFFFFF176), // Soft yellow
+      onSecondary: const Color(0xFF3E3E00),
+      secondaryContainer: const Color(0xFFBFAF60),
+      onSecondaryContainer: Colors.black,
 
-  // Balanced mid green
-  tertiary: const Color(0xFFB2DFDB), // Pastel teal
-  onTertiary: const Color(0xFF004D40),
-  tertiaryContainer: const Color(0xFF4DB6AC),
-  onTertiaryContainer: Colors.white,
+      // Balanced mid green
+      tertiary: const Color(0xFFB2DFDB), // Pastel teal
+      onTertiary: const Color(0xFF004D40),
+      tertiaryContainer: const Color(0xFF4DB6AC),
+      onTertiaryContainer: Colors.white,
 
-  // Gentle error tones
-  error: const Color(0xFFE57373),
-  onError: Colors.black,
-  errorContainer: const Color.fromARGB(255, 155, 26, 119),
-  onErrorContainer: Colors.white,
+      // Gentle error tones
+      error: const Color(0xFFE57373),
+      onError: Colors.black,
+      errorContainer: const Color.fromARGB(255, 155, 26, 119),
+      onErrorContainer: Colors.white,
 
-  // Backgrounds and surfaces
-  background: const Color(0xFF1A1A1A), // Softer dark
-  onBackground: const Color(0xFFE0E0E0),
-  surface: const Color(0xFF242424), // Smooth dark surface
-  onSurface: const Color(0xFFE0E0E0),
-  surfaceVariant: const Color(0xFF3A3A3A), // Mid-tone surface variation
-  onSurfaceVariant: const Color(0xFFBDBDBD),
+      // Backgrounds and surfaces
+      background: const Color(0xFF1A1A1A), // Softer dark
+      onBackground: const Color(0xFFE0E0E0),
+      surface: const Color(0xFF242424), // Smooth dark surface
+      onSurface: const Color(0xFFE0E0E0),
+      surfaceVariant: const Color(0xFF3A3A3A), // Mid-tone surface variation
+      onSurfaceVariant: const Color(0xFFBDBDBD),
 
-  // UI details
-  outline: const Color(0xFF707070),
-  shadow: Colors.black54,
-  inverseSurface: const Color(0xFFEAEAEA),
-  onInverseSurface: const Color(0xFF1A1A1A),
-  inversePrimary: const Color(0xFF66BB6A), // Mid pastel green
-  surfaceTint: const Color(0xFFA5D6A7),
-);
+      // UI details
+      outline: const Color(0xFF707070),
+      shadow: Colors.black54,
+      inverseSurface: const Color(0xFFEAEAEA),
+      onInverseSurface: const Color(0xFF1A1A1A),
+      inversePrimary: const Color(0xFF66BB6A), // Mid pastel green
+      surfaceTint: const Color(0xFFA5D6A7),
+    );
 
     return MaterialApp(
       title: 'Mind Garden',
@@ -203,14 +205,13 @@ class _MyAppState extends State<MyApp> {
         ),
         cardColor: darkColorScheme.surface,
       ),
-      home: StreamBuilder(
+      home: StreamBuilder( // Directly use StreamBuilder for auth state
         stream: supabase.auth.onAuthStateChange,
-        builder: (context, snapshot) {
-          if (snapshot.hasData && supabase.auth.currentSession != null) {
-            // Pass the theme toggle function to HomePage
-            return HomePage(toggleTheme: _toggleTheme); // Corrected: Pass _toggleTheme
+        builder: (context, authSnapshot) {
+          if (authSnapshot.hasData && supabase.auth.currentSession != null) {
+            return HomePage(toggleTheme: _toggleTheme);
           }
-          return const LoginPage();
+          return const LoginPage(); // Always start with LoginPage if not authenticated
         },
       ),
       debugShowCheckedModeBanner: false,

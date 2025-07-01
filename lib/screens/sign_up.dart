@@ -40,7 +40,8 @@ class _SignUpPageState extends State<SignUpPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Sign up successful! Check your email for confirmation.')),
           );
-          Navigator.pop(context);
+          // After successful sign-up, navigate back to the login page
+          Navigator.pop(context); // This will pop back to the LoginPage
         }
       }
     } on AuthException catch (e) {
