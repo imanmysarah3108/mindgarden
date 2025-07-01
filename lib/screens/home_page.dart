@@ -8,7 +8,9 @@ import 'entry_editor_page.dart';
 import 'stats_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Function(bool) toggleTheme; // Callback to toggle theme
+
+  const HomePage({super.key, required this.toggleTheme}); // Added required this.toggleTheme
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -99,6 +101,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine current brightness to show appropriate icon
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return _HomePageInherited(
       entriesFuture: _entriesFuture,
       refreshEntries: _refreshEntries,
@@ -108,6 +113,12 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('Mind Garden'),
           actions: [
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.wb_sunny : Icons.mode_night), // Sun for dark, Moon for light
+              onPressed: () {
+                widget.toggleTheme(!isDarkMode); // Correctly call widget.toggleTheme
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () async {
@@ -326,7 +337,7 @@ class EntriesListScreen extends StatelessWidget {
         ),
         // Insert the new mood picker here
         _buildMoodPicker(context, homePageInherited.refreshEntries),
-        const SizedBox(height: 25), // Space between mood picker and "Past Entries"
+        const SizedBox(height: 35), // Space between mood picker and "Past Entries"
         Padding( // New Padding for "Past Entries" to control its alignment
           padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
           child: Align(
@@ -368,7 +379,7 @@ class EntriesListScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: entry.displayColor != null
-                              ? BorderSide(color: entry.displayColor!, width: 5) // Use color as outline
+                              ? BorderSide(color: entry.displayColor!, width: 2) // Use color as outline
                               : BorderSide.none, // No border if no color
                         ),
                         child: Container( // Wrap ListTile in Container to set background color

@@ -82,7 +82,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24), // Space after the new text
+              const SizedBox(height: 40), // Space after the new text
               TextFormField(
                 controller: _nicknameController,
                 decoration: const InputDecoration(labelText: 'Nickname'),
