@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Still needed for theme persistence
+import 'package:shared_preferences/shared_preferences.dart'; 
 import 'screens/home_page.dart';
 import 'screens/login_page.dart';
-// No longer importing onboarding_page directly here, as login_page will handle it.
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+// Supabase initialization
   await Supabase.initialize(
     url: 'https://mjldmelaqwluohwgzfbu.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qbGRtZWxhcXdsdW9od2d6ZmJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0Mzc1ODEsImV4cCI6MjA2NjAxMzU4MX0.y1RLbT61jnf9RswXrfD_ebVVnVWU3mAFeZ7XSYdsAjw4',
@@ -29,6 +29,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+// Manage app theme and authentication state 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.light;
 
@@ -36,7 +37,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _loadThemeMode();
-    // Removed _hasSeenOnboardingFuture as onboarding is now part of sign-up flow
   }
 
   // Load theme mode from SharedPreferences
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Light Color Scheme (your existing pastel)
+    // Light Color Scheme 
     final ColorScheme pastelColorScheme = ColorScheme(
       brightness: Brightness.light,
       primary: const Color(0xFF2E7D32), // Dark Green (Logo)
