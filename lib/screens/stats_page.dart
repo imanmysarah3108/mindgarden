@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/entry.dart';
 import '../utils/constants.dart';
 
+// StatsPage displays various statistics about the user's journal entries
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
 
@@ -32,6 +33,7 @@ class _StatsPageState extends State<StatsPage> {
     _entriesFuture = _fetchEntries();
   }
 
+// Fetch entries from Supabase
   Future<List<Entry>> _fetchEntries() async {
     final userId = supabase.auth.currentUser!.id;
     final response = await supabase
@@ -44,6 +46,7 @@ class _StatsPageState extends State<StatsPage> {
     return data.map((json) => Entry.fromJson(json)).toList();
   }
 
+// StatsPage UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +61,7 @@ class _StatsPageState extends State<StatsPage> {
             return const Center(child: Text("No data available to show stats. Start writing some entries!"));
           }
 
+// If we have data, proceed to build the stats view
           final entries = snapshot.data!;
           final totalEntries = entries.length;
           final streak = _calculateStreak(entries);
@@ -72,6 +76,7 @@ class _StatsPageState extends State<StatsPage> {
           final DateTime endDate = DateTime(today.year, today.month, today.day);
           final String weekRange = "${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}";
 
+// Build the stats view
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -79,11 +84,11 @@ class _StatsPageState extends State<StatsPage> {
               children: [
                 // Total Entries
                 _buildStatCard("Total Entries", value: totalEntries.toString()),
-                const SizedBox(height: 16), // Add space between cards
+                const SizedBox(height: 16), 
 
                 // Current Streak
                 _buildStatCard("Current Streak", value: "$streak days"),
-                const SizedBox(height: 16), // Add space between cards
+                const SizedBox(height: 16), 
 
                 // Mood Bar
                 _buildMoodBar(moodPercentages, weekRange),
@@ -115,8 +120,8 @@ class _StatsPageState extends State<StatsPage> {
 
   Widget _buildStatCard(String title, {String? value, Widget? valueWidget}) {
     return Card(
-      elevation: 4, // Increased elevation for a more prominent look
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Rounded corners
+      elevation: 4, 
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -126,7 +131,7 @@ class _StatsPageState extends State<StatsPage> {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-              textAlign: TextAlign.center, // Center align title
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             if (value != null)
@@ -136,7 +141,7 @@ class _StatsPageState extends State<StatsPage> {
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                textAlign: TextAlign.center, // Center align value
+                textAlign: TextAlign.center,
               ),
             if (valueWidget != null)
               valueWidget,
@@ -185,6 +190,7 @@ class _StatsPageState extends State<StatsPage> {
     return streak;
   }
 
+  // Helper to get the emoji for a given mood name
   String? _getMoodEmoji(String moodName) {
     final mood = _availableMoods.firstWhere(
       (m) => m['name'] == moodName,
@@ -218,7 +224,7 @@ class _StatsPageState extends State<StatsPage> {
   }
 
 
-  // New Widget for the Mood Bar
+  // Mood Bar
   Widget _buildMoodBar(Map<String, double> moodPercentages, String weekRange) {
     if (moodPercentages.isEmpty) {
       return _buildStatCard(
@@ -270,10 +276,10 @@ class _StatsPageState extends State<StatsPage> {
             // The actual mood bar
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Container( // Replaced LinearProgressIndicator with a Container
-                height: 20, // Fixed height for the bar
+              child: Container(
+                height: 20, 
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant, // Background color for the bar
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: LayoutBuilder(
@@ -281,7 +287,7 @@ class _StatsPageState extends State<StatsPage> {
                     double currentWidth = 0;
                     return Stack(
                       children: sortedMoods.map((e) {
-                        final moodColor = _getMoodColor(e.key); // Get a color for the mood
+                        final moodColor = _getMoodColor(e.key);
                         final segmentWidth = (e.value / 100) * constraints.maxWidth;
                         final offset = currentWidth;
                         currentWidth += segmentWidth;
@@ -381,10 +387,10 @@ class _StatsPageState extends State<StatsPage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(), // Disable scrolling
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // 3 items per row
+                  crossAxisCount: 3,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 0.8, // Adjust aspect ratio for better sizing
+                  childAspectRatio: 0.8, 
                 ),
                 itemCount: topTags.length,
                 itemBuilder: (context, index) {
@@ -397,8 +403,7 @@ class _StatsPageState extends State<StatsPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Removed the number (index + 1)
-                        // Removed the Icon
+
                         Text(
                           tag['name'],
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -439,7 +444,7 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-
+// Calculate the average entry length in words
   double _getAverageEntryLength(List<Entry> entries) {
     if (entries.isEmpty) return 0.0;
     int totalWords = 0;
@@ -449,6 +454,7 @@ class _StatsPageState extends State<StatsPage> {
     return totalWords / entries.length;
   }
 
+  // Calculate the total words written across all entries
   int _getTotalWordsWritten(List<Entry> entries) {
     if (entries.isEmpty) return 0;
     int totalWords = 0;

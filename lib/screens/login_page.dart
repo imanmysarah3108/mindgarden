@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'sign_up.dart';
-import 'onboarding_page.dart'; // Import the OnboardingPage
+import 'onboarding_page.dart';
 import '../utils/constants.dart';
 
+// Log in page for Mind Garden application that 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,6 +12,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+// State class for LoginPage that handles user input and authentication
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -20,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     setState(() { _isLoading = true; });
 
+    // Important: Supabase authentication method
     try {
       await supabase.auth.signInWithPassword(
         email: _emailController.text.trim(),
@@ -32,10 +35,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } finally {
-      if(mounted) setState(() { _isLoading = false; });
+      if (mounted) setState(() { _isLoading = false; });
     }
   }
 
+  // Login Page UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,6 +104,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Dispose of controllers to free up resources
   @override
   void dispose() {
     _emailController.dispose();

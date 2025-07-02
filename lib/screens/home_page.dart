@@ -7,11 +7,15 @@ import '../utils/constants.dart';
 import 'entry_editor_page.dart';
 import 'stats_page.dart';
 
+/// HomePage is the main screen of the Mind Garden app.
+
+// Toggle between light and dark themes
 class HomePage extends StatefulWidget {
   final Function(bool) toggleTheme; // Callback to toggle theme
 
   const HomePage({super.key, required this.toggleTheme}); // Added required this.toggleTheme
 
+// This widget manages the state of the home page
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -21,8 +25,7 @@ class _HomePageState extends State<HomePage> {
   late Future<List<Entry>> _entriesFuture;
   String? _nickname; // State variable to store the user's nickname
 
-  // The screens list will now be built within the _HomePageInherited scope
-  // to ensure they have access to the inherited data.
+  // List of screens to display in the bottom navigation bar
   List<Widget> _getScreens() {
     return [
       const EntriesListScreen(),
@@ -30,6 +33,7 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
+// Initialize the state of the home page
   @override
   void initState() {
     super.initState();
@@ -37,6 +41,7 @@ class _HomePageState extends State<HomePage> {
     _fetchUserProfile(); // Fetch user profile when the page initializes
   }
 
+// Fetch the user's nickname from the Supabase profiles table
   Future<void> _fetchUserProfile() async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
@@ -62,6 +67,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+// Fetch entries from the Supabase database
   Future<List<Entry>> _fetchEntries() async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return [];
@@ -99,27 +105,31 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+// Home Page UI
   @override
   Widget build(BuildContext context) {
     // Determine current brightness to show appropriate icon
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+// Use InheritedWidget to pass down the entries and functions
     return _HomePageInherited(
       entriesFuture: _entriesFuture,
       refreshEntries: _refreshEntries,
       deleteEntry: _deleteEntry,
-      nickname: _nickname, // Pass the nickname to the inherited widget
+      nickname: _nickname, 
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Mind Garden'),
           actions: [
+            // IconButton for theme toggle
             IconButton(
               icon: Icon(isDarkMode ? Icons.wb_sunny : Icons.mode_night), // Sun for dark, Moon for light
               onPressed: () {
-                widget.toggleTheme(!isDarkMode); // Correctly call widget.toggleTheme
+                widget.toggleTheme(!isDarkMode); // Toggle theme                        
               },
             ),
             IconButton(
+              // IconButton for logout
               icon: const Icon(Icons.logout),
               onPressed: () async {
                 await supabase.auth.signOut();
@@ -132,8 +142,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        body: _getScreens()[_currentIndex], // Access screens via _getScreens()
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Docked to the center of the bottom app bar
+        body: _getScreens()[_currentIndex],
+        // Add new entry button with a flower icon
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, 
         floatingActionButton: _currentIndex == 0
             ? FloatingActionButton(
                 onPressed: () async {
@@ -147,52 +158,52 @@ class _HomePageState extends State<HomePage> {
                     _refreshEntries();
                   }
                 },
-                shape: const CircleBorder(), // Ensure it's a perfect circle
-                backgroundColor: Theme.of(context).colorScheme.errorContainer, // Set background color to pinkish
-                child: const Icon(Icons.local_florist), // Flower icon
+                shape: const CircleBorder(),
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                child: const Icon(Icons.local_florist),
               )
             : null,
+        
+        // Bottom navigation bar for switching between entries and stats
         bottomNavigationBar: BottomAppBar(
-          shape: const CircularNotchedRectangle(), // Creates a notch for the FAB
-          notchMargin: 6.0, // Reduced notch margin for a tighter fit
-          color: Theme.of(context).colorScheme.primaryContainer, // Match app bar color or theme
-          child: SizedBox( // Added SizedBox to control height
-            height: kBottomNavigationBarHeight - 10.0, // Explicitly set a slightly reduced height
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 6.0,
+          color: Theme.of(context).colorScheme.primaryContainer,
+          child: SizedBox(
+            height: kBottomNavigationBarHeight - 10.0, 
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Expanded(
-                  child: InkWell( // Use InkWell for tap effect
+                  child: InkWell( // Tap effect
                     onTap: () => setState(() => _currentIndex = 0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        Icon( // Home icon
                           Icons.home,
                           color: _currentIndex == 0
                               ? Theme.of(context).colorScheme.onPrimaryContainer
                               : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
                         ),
-                        // Removed Text label
                       ],
                     ),
                   ),
                 ),
-                // Spacer for the FAB
-                const SizedBox(width: 60), // Adjust width to match FAB size
+
+                const SizedBox(width: 60),
                 Expanded(
-                  child: InkWell( // Use InkWell for tap effect
+                  child: InkWell( // Tap effect
                     onTap: () => setState(() => _currentIndex = 1),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        Icon( // Stats icon
                           Icons.bar_chart,
                           color: _currentIndex == 1
                               ? Theme.of(context).colorScheme.onPrimaryContainer
                               : Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
                         ),
-                        // Removed Text label
                       ],
                     ),
                   ),
@@ -206,10 +217,11 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+// EntriesListScreen displays a list of past entries with mood emojis
 class EntriesListScreen extends StatelessWidget {
   const EntriesListScreen({super.key});
 
-  // Define a list of moods with emojis, consistent with entry_editor_page and stats_page
+  // List of moods with emojis, consistent with entry_editor_page and stats_page
   final List<Map<String, String>> _availableMoods = const [
     {'name': 'Happy', 'emoji': '😊'},
     {'name': 'Calm', 'emoji': '😌'},
@@ -225,19 +237,19 @@ class EntriesListScreen extends StatelessWidget {
     if (moodName == null) return '';
     final mood = _availableMoods.firstWhere(
       (m) => m['name'] == moodName,
-      orElse: () => {'emoji': ''}, // Return empty string if not found
+      orElse: () => {'emoji': ''}, 
     );
     return mood['emoji'] ?? '';
   }
 
-  // New widget for the mood picker on the home page
+  // Mood picker on the home page
   Widget _buildMoodPicker(BuildContext context, Function refreshEntries) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16), // Space after "How are you feeling today?"
         SizedBox(
-          height: 80, // Adjust height as needed
+          height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _availableMoods.length,
@@ -257,10 +269,10 @@ class EntriesListScreen extends StatelessWidget {
                   }
                 },
                 child: Container(
-                  width: 70, // Adjust width for each mood item
+                  width: 70, 
                   margin: const EdgeInsets.symmetric(horizontal: 4.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor, // Use card color for mood items
+                    color: Theme.of(context).cardColor, 
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
@@ -293,7 +305,7 @@ class EntriesListScreen extends StatelessWidget {
       ],
     );
   }
-
+// Build the entries list screen with mood picker and past entries
   @override
   Widget build(BuildContext context) {
     // Access the inherited widget safely using .of(context)
@@ -308,12 +320,12 @@ class EntriesListScreen extends StatelessWidget {
     final nickname = homePageInherited.nickname; // Get nickname from inherited widget
 
     return Column( // Use a Column to stack the welcome message and the list
-      crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch to take full width
+      crossAxisAlignment: CrossAxisAlignment.stretch, 
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // Keep this for inner centering
+            crossAxisAlignment: CrossAxisAlignment.center, 
             children: [
               const SizedBox(height: 20),
               Text(
@@ -322,7 +334,7 @@ class EntriesListScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                textAlign: TextAlign.center, // Center the text
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
@@ -330,24 +342,25 @@ class EntriesListScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                textAlign: TextAlign.center, // Center the text
+                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        // Insert the new mood picker here
+
+        // Mood picker on home page
         _buildMoodPicker(context, homePageInherited.refreshEntries),
         const SizedBox(height: 35), // Space between mood picker and "Past Entries"
         Padding( // New Padding for "Past Entries" to control its alignment
-          padding: const EdgeInsets.symmetric(horizontal: 16.0), // Match horizontal padding
+          padding: const EdgeInsets.symmetric(horizontal: 16.0), 
           child: Align(
-            alignment: Alignment.centerLeft, // Align to the left
+            alignment: Alignment.centerLeft, 
             child: Text(
               'Past Entries',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 20, // Decreased font size
+                    fontSize: 20, 
                   ),
             ),
           ),
@@ -392,23 +405,22 @@ class EntriesListScreen extends StatelessWidget {
                             // Display mood emoji on the left
                             leading: Text(
                               _getMoodEmoji(entry.mood),
-                              style: const TextStyle(fontSize: 30), // Adjust size as needed
+                              style: const TextStyle(fontSize: 30), 
                             ),
                             title: Text(
                               entry.title,
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface, // Text color based on theme
+                                    color: Theme.of(context).colorScheme.onSurface, 
                                   ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Only display the date, remove content
                                 const SizedBox(height: 4.0),
                                 Text(
                                   DateFormat('yyyy-MM-dd').format(entry.entryDate),
                                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant, // Text color based on theme
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                 ),
                               ],
@@ -447,20 +459,20 @@ class _HomePageInherited extends InheritedWidget {
   final Future<List<Entry>> entriesFuture;
   final Future<void> Function() refreshEntries;
   final Future<void> Function(String) deleteEntry;
-  final String? nickname; // New property for nickname
+  final String? nickname; 
 
   const _HomePageInherited({
-    super.key, // Add key to constructor
+    super.key,
     required super.child,
     required this.entriesFuture,
     required this.refreshEntries,
     required this.deleteEntry,
-    this.nickname, // Include nickname in constructor
+    this.nickname,
   });
 
   @override
   bool updateShouldNotify(_HomePageInherited oldWidget) =>
-      entriesFuture != oldWidget.entriesFuture || nickname != oldWidget.nickname; // Update condition
+      entriesFuture != oldWidget.entriesFuture || nickname != oldWidget.nickname;
 
   static _HomePageInherited? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_HomePageInherited>();

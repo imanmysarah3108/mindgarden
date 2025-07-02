@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Still needed for theme persistence
-import 'sign_up.dart'; // Import the SignUpPage
+import 'package:shared_preferences/shared_preferences.dart';
+import 'sign_up.dart';
 
+// Onboarding page for Mind Garden application
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
@@ -13,10 +14,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Define your onboarding slides content
+  // Onboarding slides content
   final List<Map<String, String>> _onboardingData = [
     {
-      'image': 'assets/mindgarden_logo.png', // Placeholder, replace with actual asset paths
+      'image': 'assets/mindgarden_logo.png',
       'title': 'Welcome to Mind Garden',
       'description': 'Your personal space to cultivate thoughts and track your well-being.',
     },
@@ -46,6 +47,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
+  // Function to save onboarding completion status
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,9 +69,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               );
             },
           ),
-          // Dot indicators
+          // Dot indicators for slider onboarding pages
           Positioned(
-            bottom: 100, // Adjust position as needed
+            bottom: 100,
             left: 0,
             right: 0,
             child: Row(
@@ -97,7 +99,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           // Get Started button (bottom center on last page)
           Positioned(
-            bottom: 30, // Adjust position as needed
+            bottom: 30,
             left: 20,
             right: 20,
             child: AnimatedOpacity(
@@ -136,7 +138,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         children: [
           Image.asset(
             imagePath,
-            height: 250, // Adjust image height as needed
+            height: 250,
           ),
           const SizedBox(height: 40),
           Text(
@@ -176,6 +178,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
+  // Function to save onboarding completion status
   @override
   void dispose() {
     _pageController.dispose();
