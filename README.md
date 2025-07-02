@@ -23,9 +23,9 @@ Mind Garden is a personal journaling and mood tracking application developed wit
 - Responsive Interface: Adapts seamlessly across various screen sizes (mobile and tablet).
 
 # Technologies Utilized
-1. Flutter: Google's UI toolkit for developing native applications across mobile, web, and desktop from a single codebase.
-2. Supabase: An open-source Firebase alternative, offering Authentication (user management), PostgreSQL Database (journal entries, profiles), and Storage (image uploads like entry_images).
-3. Additional Libraries: Integrates google_fonts for custom typography, intl for date formatting, image_picker for gallery image selection, path for file path manipulation, and shared_preferences for local data storage.
+- Flutter: Google's UI toolkit for developing native applications across mobile, web, and desktop from a single codebase.
+- Supabase: An open-source Firebase alternative, offering Authentication (user management), PostgreSQL Database (journal entries, profiles), and Storage (image uploads like entry_images).
+- Additional Libraries: Integrates google_fonts for custom typography, intl for date formatting, image_picker for gallery image selection, path for file path manipulation, and shared_preferences for local data storage.
 
 # Application Flow
 1. Application Launch: The app starts on the LoginPage.
