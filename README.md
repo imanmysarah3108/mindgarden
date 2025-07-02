@@ -31,7 +31,7 @@ Mind Garden is a personal journaling and mood tracking application developed wit
 1. Application Launch: The app starts on the LoginPage.
 2. Registration: Users can select "Don't have an account? Sign Up" to proceed to the OnboardingPage.
 3. Onboarding: Navigate introductory slides; a "Skip" button is available. The "Get Started" button on the final slide directs to the SignUpPage.
-4. Account Creation: On the SignUpPage, users provide a nickname, email, and password. Upon successful registration, profile     data (user_id, nickname, email) is stored in the profiles table, and the user is redirected to the LoginPage.
+4. Account Creation: On the SignUpPage, users provide a nickname, email, and password. Upon successful registration, profile data (user_id, nickname, email) is stored in the profiles table, and the user is redirected to the LoginPage.
 5. Login: Users enter credentials on the LoginPage. Successful authentication leads to HomePage.
 6. Home Page: Displays a welcome message, mood selection interface, and a list of prior entries.
 7. Entry Editor: Allows creating or editing entries, with options for title, content, date, image, tags, color, and mood.
