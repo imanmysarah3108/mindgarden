@@ -1,17 +1,19 @@
 // lib/models/entry.dart
 import 'package:flutter/material.dart';
 
+// This file defines the Entry model for the Mind Garden application.
 class Entry {
-  final String id;
-  final String userId;
-  final String title;
-  final String content;
-  final DateTime entryDate;
-  final String? imageUrl;
-  final List<String>? tags;
-  final String? color; // Stored as hex string #AARRGGBB
+  final String id; // Unique identifier for the entry
+  final String userId; // Identifier for the user who created the entry
+  final String title; // Title of the entry
+  final String content; // Content of the entry
+  final DateTime entryDate; // Date and time when the entry was created
+  final String? imageUrl; // Optional URL for an image associated with the entry
+  final List<String>? tags; // Optional list of tags associated with the entry
+  final String? color; // Stored as hex string
   final String? mood; // New mood field
 
+  // Constructor for Entry class
   Entry({
     required this.id,
     required this.userId,
@@ -21,9 +23,10 @@ class Entry {
     this.imageUrl,
     this.tags,
     this.color,
-    this.mood, // Include mood in constructor
+    this.mood,
   });
 
+  // Method to convert Entry object to JSON format
   factory Entry.fromJson(Map<String, dynamic> json) {
     return Entry(
       id: json['id'] as String,
@@ -34,7 +37,7 @@ class Entry {
       imageUrl: json['image_url'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
       color: json['color'] as String?,
-      mood: json['mood'] as String?, // Parse mood from JSON
+      mood: json['mood'] as String?,
     );
   }
 

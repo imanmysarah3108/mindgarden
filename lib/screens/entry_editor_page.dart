@@ -7,16 +7,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/entry.dart';
 import '../utils/constants.dart';
 
+// This page allows users to create or edit an entry in the Mind Garden application.
 class EntryEditorPage extends StatefulWidget {
   final Entry? entry;
-  final String? initialMood; // New parameter for initial mood
+  final String? initialMood; // Parameter to accept initial mood when creating a new entry
 
-  const EntryEditorPage({super.key, this.entry, this.initialMood}); // Include initialMood in constructor
+  const EntryEditorPage({super.key, this.entry, this.initialMood});
 
   @override
   State<EntryEditorPage> createState() => _EntryEditorPageState();
 }
 
+// State class for EntryEditorPage
+// This class manages the state of the entry editor, including form fields, image selection, and mood selection.
 class _EntryEditorPageState extends State<EntryEditorPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
@@ -26,8 +29,9 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
   List<String> _tags = [];
   final _tagController = TextEditingController();
   String? _selectedColorHex;
-  String? _selectedMood; // New state variable for selected mood
+  String? _selectedMood;
 
+  // Colour options for the entry
   final List<Color> _availableColors = [
     const Color(0xFFFADADD), // Light Pink
     const Color(0xFFC4E4F4), // Light Blue
@@ -36,7 +40,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     const Color(0xFFE6E6FA), // Lavender
   ];
 
-  // Define a list of moods with emojis
+  // Mood options for the entry
   final List<Map<String, String>> _availableMoods = [
     {'name': 'Happy', 'emoji': '😊'},
     {'name': 'Calm', 'emoji': '😌'},
@@ -48,6 +52,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     {'name': 'Tired', 'emoji': '😴'},
   ];
 
+  // Initialize the state with existing entry data or initial mood
   @override
   void initState() {
     super.initState();
@@ -60,10 +65,11 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       _selectedColorHex = widget.entry!.color;
       _selectedMood = widget.entry!.mood; // Load existing mood from entry
     } else if (widget.initialMood != null) {
-      _selectedMood = widget.initialMood; // Set initial mood from parameter if creating new entry
+      _selectedMood = widget.initialMood; // Set initial mood from parameter if creating new entry by choosing a mood in home page.
     }
   }
 
+  // Dispose of controllers to free up resources
   @override
   void dispose() {
     _titleController.dispose();
@@ -72,6 +78,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     super.dispose();
   }
 
+  // Function to select a date using a date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -86,6 +93,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     }
   }
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -105,6 +113,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     });
   }
 
+  // Function to add a tag from the tag input field
   void _addTag() {
     final tagText = _tagController.text.trim();
     if (tagText.isNotEmpty && !_tags.contains(tagText)) {
@@ -121,10 +130,12 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     });
   }
 
+  // Helper function to convert Color to hex string
   String _colorToHex(Color color) {
     return '#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
   }
 
+  // Function to save the entry, either creating a new one or updating an existing one
   Future<void> _saveEntry() async {
     final title = _titleController.text;
     final content = _contentController.text;
@@ -134,17 +145,17 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       );
       return;
     }
-
+    // store image URL and upload image file in Supabase storage
     String? finalImageUrl = _currentImageUrl;
     if (_imageFile != null) {
       try {
         final userId = supabase.auth.currentUser!.id;
         final fileName = '${userId}/${DateTime.now().millisecondsSinceEpoch}${p.extension(_imageFile!.path)}';
         await supabase.storage.from('entryimages').upload(
-              fileName,
-              _imageFile!,
-              fileOptions: const FileOptions(upsert: true),
-            );
+          fileName,
+          _imageFile!,
+          fileOptions: const FileOptions(upsert: true),
+        );
         finalImageUrl = supabase.storage.from('entryimages').getPublicUrl(fileName);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +164,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
         return;
       }
     }
-
+    // Prepare the entry data to be saved
     final entryData = {
       'user_id': supabase.auth.currentUser!.id,
       'title': title,
@@ -165,6 +176,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       'mood': _selectedMood, // Save the selected mood
     };
 
+    // Insert or update the entry in the database
     try {
       if (widget.entry == null) {
         await supabase.from('entries').insert(entryData);
@@ -181,6 +193,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
     }
   }
 
+  // UI for the entry editor page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,7 +211,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildMoodChooser(), // Add mood chooser here
+            _buildMoodChooser(),
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleController,
@@ -349,7 +362,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
         const Text('Mood', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         SizedBox(
-          height: 80, // Adjust height as needed
+          height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _availableMoods.length,
@@ -363,7 +376,7 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
                   });
                 },
                 child: Container(
-                  width: 70, // Adjust width for each mood item
+                  width: 70,
                   margin: const EdgeInsets.symmetric(horizontal: 4.0),
                   decoration: BoxDecoration(
                     color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).cardColor,
