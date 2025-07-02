@@ -140,12 +140,12 @@ class _EntryEditorPageState extends State<EntryEditorPage> {
       try {
         final userId = supabase.auth.currentUser!.id;
         final fileName = '${userId}/${DateTime.now().millisecondsSinceEpoch}${p.extension(_imageFile!.path)}';
-        await supabase.storage.from('entry_images').upload(
+        await supabase.storage.from('entryimages').upload(
               fileName,
               _imageFile!,
               fileOptions: const FileOptions(upsert: true),
             );
-        finalImageUrl = supabase.storage.from('entry_images').getPublicUrl(fileName);
+        finalImageUrl = supabase.storage.from('entryimages').getPublicUrl(fileName);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Image upload failed: $e')),
